@@ -1,9 +1,11 @@
 import { useState, useCallback } from "react";
+import { AuthProvider, useAuth } from "./context/AuthContext";
 import { ChatProvider } from "./context/ChatContext";
 import { Sidebar } from "./components/Sidebar";
 import { ChatView } from "./components/ChatView";
+import { AuthPage } from "./components/AuthPage";
 
-function App() {
+function AuthenticatedApp() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const openSidebar = useCallback(() => setSidebarOpen(true), []);
@@ -34,6 +36,34 @@ function App() {
         <ChatView onMenuClick={openSidebar} />
       </div>
     </ChatProvider>
+  );
+}
+
+function AppContent() {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-full bg-[var(--bg)]">
+        <div className="text-[var(--green-dark)] text-xs tracking-[0.3em] uppercase animate-pulse">
+          INITIALIZING...
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <AuthPage />;
+  }
+
+  return <AuthenticatedApp />;
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }
 

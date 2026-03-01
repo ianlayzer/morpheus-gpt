@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import { sessionRouter } from "./routes/sessions";
+import { authRouter } from "./routes/auth";
 import { requestLogger } from "./middleware/logger";
 
 const app = express();
@@ -10,6 +11,7 @@ app.use(cors());
 app.use(express.json());
 app.use(requestLogger);
 
+app.use("/api/auth", authRouter);
 app.use("/api/sessions", sessionRouter);
 
 app.get("/api/health", (_req, res) => {

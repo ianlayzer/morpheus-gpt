@@ -8,8 +8,12 @@ import {
   truncateContext,
   ChatMessage,
 } from "../lib/claude";
+import { authMiddleware } from "../middleware/auth";
 
 export const sessionRouter = Router();
+
+// All session routes require authentication
+sessionRouter.use(authMiddleware);
 
 function paramId(req: Request): string {
   const id = req.params.id;
@@ -17,10 +21,10 @@ function paramId(req: Request): string {
 }
 
 // GET /api/sessions — list non-deleted sessions
-sessionRouter.get("/", async (_req: Request, res: Response) => {
+sessionRouter.get("/", async (req: Request, res: Response) => {
   try {
     const sessions = await prisma.session.findMany({
-      where: { deletedAt: null },
+      where: { deletedAt: null, userId: req.userId },
       orderBy: { updatedAt: "desc" },
       select: {
         id: true,
@@ -37,9 +41,9 @@ sessionRouter.get("/", async (_req: Request, res: Response) => {
 });
 
 // POST /api/sessions — create new session
-sessionRouter.post("/", async (_req: Request, res: Response) => {
+sessionRouter.post("/", async (req: Request, res: Response) => {
   try {
-    const session = await prisma.session.create({ data: {} });
+    const session = await prisma.session.create({ data: { userId: req.userId! } });
     res.status(201).json(session);
   } catch (err) {
     console.error("Failed to create session:", err);
@@ -59,7 +63,7 @@ sessionRouter.patch("/:id", async (req: Request, res: Response) => {
     }
 
     const session = await prisma.session.updateMany({
-      where: { id: paramId(req), deletedAt: null },
+      where: { id: paramId(req), deletedAt: null, userId: req.userId },
       data: { title: parsed.data.title },
     });
 
@@ -79,7 +83,7 @@ sessionRouter.patch("/:id", async (req: Request, res: Response) => {
 sessionRouter.delete("/:id", async (req: Request, res: Response) => {
   try {
     const result = await prisma.session.updateMany({
-      where: { id: paramId(req), deletedAt: null },
+      where: { id: paramId(req), deletedAt: null, userId: req.userId },
       data: { deletedAt: new Date() },
     });
 
@@ -99,7 +103,7 @@ sessionRouter.delete("/:id", async (req: Request, res: Response) => {
 sessionRouter.get("/:id/messages", async (req: Request, res: Response) => {
   try {
     const session = await prisma.session.findFirst({
-      where: { id: paramId(req), deletedAt: null },
+      where: { id: paramId(req), deletedAt: null, userId: req.userId },
     });
 
     if (!session) {
@@ -147,7 +151,7 @@ sessionRouter.post("/:id/messages", async (req: Request, res: Response) => {
 
   try {
     const session = await prisma.session.findFirst({
-      where: { id: sessionId, deletedAt: null },
+      where: { id: sessionId, deletedAt: null, userId: req.userId },
     });
 
     if (!session) {

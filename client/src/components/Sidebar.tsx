@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { useChat } from "../context/ChatContext";
+import { useAuth } from "../context/AuthContext";
 
 export function Sidebar({ onSessionSelect }: { onSessionSelect?: () => void }) {
   const { state, createSession, selectSession, renameSession, deleteSession } =
     useChat();
+  const { user, logout } = useAuth();
 
   const handleSelect = (id: string) => {
     selectSession(id);
@@ -55,10 +57,16 @@ export function Sidebar({ onSessionSelect }: { onSessionSelect?: () => void }) {
       </div>
 
       {/* Footer */}
-      <div className="px-3 py-2 border-t border-[var(--border)] text-center">
-        <span className="text-[10px] text-[var(--green-dark)] tracking-[0.2em]">
-          MORPHEUS v1.0
+      <div className="px-3 py-2 border-t border-[var(--border)] flex items-center justify-between">
+        <span className="text-[10px] text-[var(--green-dim)] tracking-wider truncate">
+          {user?.username}
         </span>
+        <button
+          onClick={logout}
+          className="text-[10px] text-[var(--green-dark)] tracking-wider hover:text-[var(--red)] transition-colors cursor-pointer bg-transparent border-none font-[inherit]"
+        >
+          [LOGOUT]
+        </button>
       </div>
     </aside>
   );

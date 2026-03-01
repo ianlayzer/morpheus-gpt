@@ -138,6 +138,8 @@ body {
 .prose {
   line-height: 1.65;
   color: var(--green);
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 .prose p {
   margin: 0.4em 0;
@@ -163,6 +165,7 @@ body {
   padding: 0.8em 1em;
   overflow-x: auto;
   margin: 0.6em 0;
+  max-width: 100%;
 }
 .prose pre code {
   background: none;

@@ -1,9 +1,19 @@
 import { useState } from "react";
 import { useChat } from "../context/ChatContext";
 
-export function Sidebar() {
+export function Sidebar({ onSessionSelect }: { onSessionSelect?: () => void }) {
   const { state, createSession, selectSession, renameSession, deleteSession } =
     useChat();
+
+  const handleSelect = (id: string) => {
+    selectSession(id);
+    onSessionSelect?.();
+  };
+
+  const handleCreate = () => {
+    createSession();
+    onSessionSelect?.();
+  };
 
   return (
     <aside className="w-60 flex-shrink-0 bg-[var(--surface)] border-r border-[var(--border)] flex flex-col h-full">
@@ -13,7 +23,7 @@ export function Sidebar() {
           [ Sessions ]
         </div>
         <button
-          onClick={createSession}
+          onClick={handleCreate}
           className="w-full px-3 py-1.5 text-sm border border-[var(--green-dark)] text-[var(--green)] bg-transparent hover:bg-[var(--green-glow)] hover:border-[var(--green)] transition-colors cursor-pointer tracking-wider"
         >
           + NEW SESSION
@@ -28,7 +38,7 @@ export function Sidebar() {
             session={session}
             index={i}
             isActive={session.id === state.activeSessionId}
-            onSelect={() => selectSession(session.id)}
+            onSelect={() => handleSelect(session.id)}
             onRename={(title) => renameSession(session.id, title)}
             onDelete={() => deleteSession(session.id)}
           />

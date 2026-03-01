@@ -35,7 +35,7 @@ export function ChatInput() {
   };
 
   return (
-    <div className="border-t border-[var(--border)] px-4 py-3">
+    <div className="border-t border-[var(--border)] px-3 md:px-4 py-2 md:py-3">
       {state.error && (
         <div className="text-[var(--red)] text-xs mb-2 tracking-wider">
           ERROR: {state.error}
@@ -72,7 +72,7 @@ export function ChatInput() {
           </button>
         )}
       </div>
-      <div className="text-[var(--green-dark)] text-[10px] mt-1.5 text-center tracking-widest opacity-50">
+      <div className="hidden md:block text-[var(--green-dark)] text-[10px] mt-1.5 text-center tracking-widest opacity-50">
         ENTER = TRANSMIT &nbsp;&nbsp; SHIFT+ENTER = NEWLINE
       </div>
     </div>

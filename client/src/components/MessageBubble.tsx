@@ -19,9 +19,9 @@ export function MessageBubble({ message }: { message: Message }) {
   const stillTyping = !isUser && displayedContent.length < message.content.length;
 
   return (
-    <div className="mb-3 boot-in flex gap-3">
-      {/* Timestamp */}
-      <span className="text-[var(--green-dark)] text-[10px] pt-0.5 flex-shrink-0 select-none opacity-50 w-10 text-right">
+    <div className="mb-3 boot-in flex gap-2 md:gap-3">
+      {/* Timestamp — hidden on mobile, shown on md+ */}
+      <span className="hidden md:inline text-[var(--green-dark)] text-[10px] pt-0.5 flex-shrink-0 select-none opacity-50 w-10 text-right">
         {formatTime(message.createdAt)}
       </span>
 
@@ -42,18 +42,22 @@ export function MessageBubble({ message }: { message: Message }) {
               [TRANSMITTING]
             </span>
           )}
+          {/* Timestamp inline on mobile */}
+          <span className="md:hidden text-[var(--green-dark)] text-[10px] select-none opacity-50 ml-auto">
+            {formatTime(message.createdAt)}
+          </span>
         </div>
 
       {/* Message content */}
       <div
-        className={`pl-4 border-l ${
+        className={`pl-3 md:pl-4 border-l ${
           isUser
             ? "border-[var(--green-dark)] text-[var(--green-dim)]"
             : "border-[var(--green-dark)] text-[var(--green)]"
         }`}
       >
         {isUser ? (
-          <div className="text-sm whitespace-pre-wrap">{message.content}</div>
+          <div className="text-sm whitespace-pre-wrap break-words">{message.content}</div>
         ) : (
           <div className={`prose text-sm ${(isStreaming || stillTyping) ? "typing" : ""}`}>
             <ReactMarkdown remarkPlugins={[remarkGfm]}>

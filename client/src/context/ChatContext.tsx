@@ -148,9 +148,13 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     dispatch({ type: "SET_ACTIVE_SESSION", id: session.id });
   }, []);
 
-  const selectSession = useCallback((id: string) => {
-    dispatch({ type: "SET_ACTIVE_SESSION", id });
-  }, []);
+  const selectSession = useCallback(
+    (id: string) => {
+      if (id === state.activeSessionId) return;
+      dispatch({ type: "SET_ACTIVE_SESSION", id });
+    },
+    [state.activeSessionId]
+  );
 
   const handleRenameSession = useCallback(
     async (id: string, title: string) => {

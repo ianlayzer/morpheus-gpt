@@ -11,11 +11,14 @@ export function ChatView() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [state.messages]);
 
-  if (!state.activeSessionId) {
-    return (
-      <div className="flex-1 flex items-center justify-center bg-[var(--bg)]">
-        <div className="text-center boot-in max-w-lg px-6">
-          <pre className="text-[var(--green)] glow text-xs leading-relaxed mb-6 inline-block text-left">
+  return (
+    <div className="flex-1 flex flex-col min-w-0 bg-[var(--bg)]">
+      <div className="flex-1 overflow-y-auto px-4 pt-4 pb-2">
+        <div className="max-w-3xl mx-auto">
+          {!state.activeSessionId && (
+            <div className="flex items-center justify-center min-h-[60vh]">
+              <div className="text-center boot-in max-w-lg px-6">
+                <pre className="text-[var(--green)] glow text-xs leading-relaxed mb-6 inline-block text-left">
 {`
  ███╗   ███╗ ██████╗ ██████╗ ██████╗ ██╗  ██╗███████╗██╗   ██╗███████╗
  ████╗ ████║██╔═══██╗██╔══██╗██╔══██╗██║  ██║██╔════╝██║   ██║██╔════╝
@@ -24,25 +27,16 @@ export function ChatView() {
  ██║ ╚═╝ ██║╚██████╔╝██║  ██║██║     ██║  ██║███████╗╚██████╔╝███████║
  ╚═╝     ╚═╝ ╚═════╝ ╚═╝  ╚═╝╚═╝     ╚═╝  ╚═╝╚══════╝ ╚═════╝ ╚══════╝
 `}
-          </pre>
-          <div className="text-[var(--green-dim)] text-sm mb-4 leading-relaxed">
-            "I can only show you the door.
-            <br />
-            You're the one that has to walk through it."
-          </div>
-          <div className="text-[var(--green-dark)] text-xs">
-            Create a new session to begin. <span className="cursor-blink" />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex-1 flex flex-col min-w-0 bg-[var(--bg)]">
-      <div className="flex-1 overflow-y-auto px-4 pt-4 pb-2">
-        <div className="max-w-3xl mx-auto">
-          {state.messages.length === 0 && (
+                </pre>
+                <div className="text-[var(--green-dim)] text-sm mb-4 leading-relaxed">
+                  "I can only show you the door.
+                  <br />
+                  You're the one that has to walk through it."
+                </div>
+              </div>
+            </div>
+          )}
+          {state.activeSessionId && state.messages.length === 0 && (
             <div className="py-16 boot-in">
               <div className="text-[var(--green-dark)] text-xs mb-4 tracking-wider">
                 ── SESSION INITIALIZED ──

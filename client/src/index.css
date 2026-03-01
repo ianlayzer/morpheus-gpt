@@ -130,8 +130,8 @@ body {
 
 /* ── Selection ── */
 ::selection {
-  background: var(--green);
-  color: var(--bg);
+  background: rgba(0, 255, 65, 0.25);
+  color: inherit;
 }
 
 /* ── Markdown / prose ── */
@@ -191,4 +191,17 @@ body {
   color: var(--green);
   margin: 0.8em 0 0.3em;
   font-weight: 700;
+}
+
+/* ── Inline typing cursor ── */
+/* Targets the last block-level child inside .typing and appends a cursor */
+.typing > :last-child::after {
+  content: "";
+  display: inline-block;
+  width: 0.55em;
+  height: 1.05em;
+  background: var(--green);
+  vertical-align: text-bottom;
+  margin-left: 1px;
+  animation: blink-fast 0.5s step-end infinite;
 }

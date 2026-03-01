@@ -168,10 +168,8 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     []
   );
 
-  const handleSendMessage = useCallback(
-    (content: string) => {
-      if (!state.activeSessionId || state.isStreaming) return;
-
+  const startStreaming = useCallback(
+    (sessionId: string, content: string) => {
       dispatch({ type: "SET_STREAMING", isStreaming: true });
       dispatch({ type: "SET_ERROR", error: null });
 
@@ -180,7 +178,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
       api
         .sendMessage(
-          state.activeSessionId,
+          sessionId,
           content,
           (event) => {
             switch (event.type) {
@@ -199,7 +197,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
               case "title":
                 dispatch({
                   type: "UPDATE_SESSION_TITLE",
-                  id: state.activeSessionId!,
+                  id: sessionId,
                   title: event.title,
                 });
                 break;
@@ -221,7 +219,24 @@ export function ChatProvider({ children }: { children: ReactNode }) {
           }
         });
     },
-    [state.activeSessionId, state.isStreaming]
+    []
+  );
+
+  const handleSendMessage = useCallback(
+    async (content: string) => {
+      if (state.isStreaming) return;
+
+      if (state.activeSessionId) {
+        startStreaming(state.activeSessionId, content);
+      } else {
+        // Auto-create a session, then send
+        const session = await api.createSession();
+        dispatch({ type: "ADD_SESSION", session });
+        dispatch({ type: "SET_ACTIVE_SESSION", id: session.id });
+        startStreaming(session.id, content);
+      }
+    },
+    [state.activeSessionId, state.isStreaming, startStreaming]
   );
 
   const cancelStream = useCallback(() => {

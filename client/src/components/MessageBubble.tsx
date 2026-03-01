@@ -1,29 +1,48 @@
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { Message } from "../lib/api";
+import { useTypewriter } from "../lib/useTypewriter";
+
+function formatTime(iso: string): string {
+  const d = new Date(iso);
+  return d.toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+}
 
 export function MessageBubble({ message }: { message: Message }) {
   const isUser = message.role === "user";
+  const isStreaming = message.status === "streaming";
+  const displayedContent = useTypewriter(message.content, isStreaming);
+  const stillTyping = !isUser && displayedContent.length < message.content.length;
 
   return (
-    <div className="mb-3 boot-in">
-      {/* Terminal-style prefix line */}
-      <div className="flex items-baseline gap-2 text-xs mb-0.5">
-        {isUser ? (
-          <span className="text-[var(--green)] glow font-bold tracking-wider">
-            YOU &gt;
-          </span>
-        ) : (
-          <span className="text-[var(--green)] glow font-bold tracking-wider">
-            MORPHEUS &gt;
-          </span>
-        )}
-        {!isUser && message.status === "streaming" && (
-          <span className="text-[var(--green-dark)] text-[10px] tracking-widest">
-            [TRANSMITTING]
-          </span>
-        )}
-      </div>
+    <div className="mb-3 boot-in flex gap-3">
+      {/* Timestamp */}
+      <span className="text-[var(--green-dark)] text-[10px] pt-0.5 flex-shrink-0 select-none opacity-50 w-10 text-right">
+        {formatTime(message.createdAt)}
+      </span>
+
+      <div className="flex-1 min-w-0">
+        {/* Terminal-style prefix line */}
+        <div className="flex items-baseline gap-2 text-xs mb-0.5">
+          {isUser ? (
+            <span className="text-[var(--green)] glow font-bold tracking-wider">
+              YOU &gt;
+            </span>
+          ) : (
+            <span className="text-[var(--green)] glow font-bold tracking-wider">
+              MORPHEUS &gt;
+            </span>
+          )}
+          {!isUser && (isStreaming || stillTyping) && (
+            <span className="text-[var(--green-dark)] text-[10px] tracking-widest">
+              [TRANSMITTING]
+            </span>
+          )}
+        </div>
 
       {/* Message content */}
       <div
@@ -36,13 +55,10 @@ export function MessageBubble({ message }: { message: Message }) {
         {isUser ? (
           <div className="text-sm whitespace-pre-wrap">{message.content}</div>
         ) : (
-          <div className="prose text-sm">
+          <div className={`prose text-sm ${(isStreaming || stillTyping) ? "typing" : ""}`}>
             <ReactMarkdown remarkPlugins={[remarkGfm]}>
-              {message.content}
+              {displayedContent}
             </ReactMarkdown>
-            {message.status === "streaming" && (
-              <span className="cursor-stream" />
-            )}
           </div>
         )}
 
@@ -56,6 +72,7 @@ export function MessageBubble({ message }: { message: Message }) {
             [SIGNAL LOST]
           </div>
         )}
+      </div>
       </div>
     </div>
   );

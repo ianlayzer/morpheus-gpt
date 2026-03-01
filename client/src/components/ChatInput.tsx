@@ -50,12 +50,8 @@ export function ChatInput() {
           value={input}
           onChange={handleChange}
           onKeyDown={handleKeyDown}
-          placeholder={
-            state.activeSessionId
-              ? "Enter the Matrix..."
-              : "Create a session to begin"
-          }
-          disabled={!state.activeSessionId || state.isStreaming}
+          placeholder="Enter the Matrix..."
+          disabled={state.isStreaming}
           rows={1}
           className="flex-1 bg-transparent border-none text-sm text-[var(--green)] placeholder-[var(--green-dark)] resize-none outline-none disabled:opacity-30 font-[inherit] py-2"
         />
@@ -69,7 +65,7 @@ export function ChatInput() {
         ) : (
           <button
             onClick={handleSubmit}
-            disabled={!input.trim() || !state.activeSessionId}
+            disabled={!input.trim()}
             className="px-3 py-1.5 border border-[var(--green-dark)] text-[var(--green)] text-xs tracking-wider hover:bg-[var(--green-glow)] hover:border-[var(--green)] transition-colors disabled:opacity-20 disabled:cursor-not-allowed cursor-pointer font-[inherit] flex-shrink-0"
           >
             [SEND]

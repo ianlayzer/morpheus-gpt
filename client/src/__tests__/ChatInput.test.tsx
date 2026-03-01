@@ -57,11 +57,9 @@ describe("ChatInput", () => {
     expect(screen.getByText("[ABORT]")).toBeDefined();
   });
 
-  it("disables input when no active session", () => {
+  it("input is enabled even without active session (auto-creates)", () => {
     renderWithContext({ activeSessionId: null });
-    const textarea = screen.getByPlaceholderText(
-      "Create a session to begin"
-    );
-    expect(textarea).toHaveProperty("disabled", true);
+    const textarea = screen.getByPlaceholderText("Enter the Matrix...");
+    expect(textarea).toHaveProperty("disabled", false);
   });
 });

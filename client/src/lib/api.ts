@@ -57,7 +57,7 @@ export async function authRegister(
   username: string,
   password: string
 ): Promise<{ token: string; user: AuthUser }> {
-  const res = await fetch(`${API_BASE}/api/auth/register`, {
+  const res = await fetch(`${API_BASE}/auth/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username, password }),
@@ -73,7 +73,7 @@ export async function authLogin(
   username: string,
   password: string
 ): Promise<{ token: string; user: AuthUser }> {
-  const res = await fetch(`${API_BASE}/api/auth/login`, {
+  const res = await fetch(`${API_BASE}/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username, password }),
@@ -86,7 +86,7 @@ export async function authLogin(
 }
 
 export async function authMe(): Promise<{ user: AuthUser }> {
-  const res = await fetch(`${API_BASE}/api/auth/me`, {
+  const res = await fetch(`${API_BASE}/auth/me`, {
     headers: authHeaders(),
   });
   if (!res.ok) throw new Error("Not authenticated");
@@ -96,7 +96,7 @@ export async function authMe(): Promise<{ user: AuthUser }> {
 // --- Session API ---
 
 export async function fetchSessions(): Promise<Session[]> {
-  const res = await fetch(`${API_BASE}/api/sessions`, {
+  const res = await fetch(`${API_BASE}/sessions`, {
     headers: authHeaders(),
   });
   if (!res.ok) throw new Error("Failed to fetch sessions");
@@ -104,7 +104,7 @@ export async function fetchSessions(): Promise<Session[]> {
 }
 
 export async function createSession(): Promise<Session> {
-  const res = await fetch(`${API_BASE}/api/sessions`, {
+  const res = await fetch(`${API_BASE}/sessions`, {
     method: "POST",
     headers: authHeaders(),
   });
@@ -116,7 +116,7 @@ export async function renameSession(
   id: string,
   title: string
 ): Promise<void> {
-  const res = await fetch(`${API_BASE}/api/sessions/${id}`, {
+  const res = await fetch(`${API_BASE}/sessions/${id}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify({ title }),
@@ -125,7 +125,7 @@ export async function renameSession(
 }
 
 export async function deleteSession(id: string): Promise<void> {
-  const res = await fetch(`${API_BASE}/api/sessions/${id}`, {
+  const res = await fetch(`${API_BASE}/sessions/${id}`, {
     method: "DELETE",
     headers: authHeaders(),
   });
@@ -133,7 +133,7 @@ export async function deleteSession(id: string): Promise<void> {
 }
 
 export async function fetchMessages(sessionId: string): Promise<Message[]> {
-  const res = await fetch(`${API_BASE}/api/sessions/${sessionId}/messages`, {
+  const res = await fetch(`${API_BASE}/sessions/${sessionId}/messages`, {
     headers: authHeaders(),
   });
   if (!res.ok) throw new Error("Failed to fetch messages");
@@ -146,7 +146,7 @@ export async function sendMessage(
   onEvent: (event: SSEEvent) => void,
   signal?: AbortSignal
 ): Promise<void> {
-  const res = await fetch(`${API_BASE}/api/sessions/${sessionId}/messages`, {
+  const res = await fetch(`${API_BASE}/sessions/${sessionId}/messages`, {
     method: "POST",
     headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify({ content }),

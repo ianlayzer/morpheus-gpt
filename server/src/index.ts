@@ -11,10 +11,10 @@ app.use(cors());
 app.use(express.json());
 app.use(requestLogger);
 
-app.use("/api/auth", authRouter);
-app.use("/api/sessions", sessionRouter);
+app.use("/auth", authRouter);
+app.use("/sessions", sessionRouter);
 
-app.get("/api/health", (_req, res) => {
+app.get("/health", (_req, res) => {
   res.json({ status: "ok" });
 });
 

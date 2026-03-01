@@ -1,6 +1,7 @@
 import { Router, Request, Response } from "express";
 import { z } from "zod";
 import { prisma } from "../lib/prisma";
+import type { Message } from "@prisma/client";
 import {
   anthropic,
   MORPHEUS_SYSTEM_PROMPT,
@@ -112,15 +113,14 @@ sessionRouter.get("/:id/messages", async (req: Request, res: Response) => {
     });
 
     // Mark any leftover 'streaming' messages as 'error' (interrupted by server restart)
-    const staleStreaming = messages.filter((m) => m.status === "streaming");
+    const staleStreaming = messages.filter((m: Message) => m.status === "streaming");
     if (staleStreaming.length > 0) {
       await prisma.message.updateMany({
         where: {
-          id: { in: staleStreaming.map((m) => m.id) },
+          id: { in: staleStreaming.map((m: Message) => m.id) },
         },
         data: { status: "error" },
       });
-      // Update in-memory too
       for (const m of messages) {
         if (m.status === "streaming") m.status = "error";
       }
@@ -176,7 +176,7 @@ sessionRouter.post("/:id/messages", async (req: Request, res: Response) => {
       orderBy: { orderIndex: "asc" },
     });
 
-    const chatHistory: ChatMessage[] = allMessages.map((m) => ({
+    const chatHistory: ChatMessage[] = allMessages.map((m: Message) => ({
       role: m.role as "user" | "assistant",
       content: m.content,
     }));

@@ -1,7 +1,9 @@
+import { useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { Message } from "../lib/api";
 import { useTypewriter } from "../lib/useTypewriter";
+import { useChat } from "../context/ChatContext";
 
 function formatTime(iso: string): string {
   const d = new Date(iso);
@@ -12,11 +14,19 @@ function formatTime(iso: string): string {
   });
 }
 
-export function MessageBubble({ message }: { message: Message }) {
+export function MessageBubble({ message, isLast }: { message: Message; isLast: boolean }) {
   const isUser = message.role === "user";
   const isStreaming = message.status === "streaming";
   const displayedContent = useTypewriter(message.content, isStreaming);
   const stillTyping = !isUser && displayedContent.length < message.content.length;
+  const { setTyping } = useChat();
+
+  // Report typing state for the last assistant message
+  useEffect(() => {
+    if (isLast && !isUser) {
+      setTyping(stillTyping);
+    }
+  }, [isLast, isUser, stillTyping, setTyping]);
 
   return (
     <div className="mb-3 boot-in flex gap-2 md:gap-3">

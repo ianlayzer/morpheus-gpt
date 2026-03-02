@@ -144,12 +144,13 @@ export async function sendMessage(
   sessionId: string,
   content: string,
   onEvent: (event: SSEEvent) => void,
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  idempotencyKey?: string
 ): Promise<void> {
   const res = await fetch(`${API_BASE}/sessions/${sessionId}/messages`, {
     method: "POST",
     headers: { "Content-Type": "application/json", ...authHeaders() },
-    body: JSON.stringify({ content }),
+    body: JSON.stringify({ content, idempotencyKey: idempotencyKey ?? crypto.randomUUID() }),
     signal,
   });
 

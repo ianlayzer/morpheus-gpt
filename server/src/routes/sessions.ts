@@ -138,7 +138,10 @@ sessionRouter.get("/:id/messages", async (req: Request, res: Response) => {
 });
 
 // POST /api/sessions/:id/messages — send message + stream response
-const messageSchema = z.object({ content: z.string().min(1) });
+const messageSchema = z.object({
+  content: z.string().min(1),
+  idempotencyKey: z.string().uuid().optional(),
+});
 
 sessionRouter.post("/:id/messages", async (req: Request, res: Response) => {
   const parsed = messageSchema.safeParse(req.body);
@@ -148,6 +151,7 @@ sessionRouter.post("/:id/messages", async (req: Request, res: Response) => {
   }
 
   const sessionId = paramId(req);
+  const { content, idempotencyKey } = parsed.data;
 
   try {
     const session = await prisma.session.findFirst({
@@ -157,6 +161,19 @@ sessionRouter.post("/:id/messages", async (req: Request, res: Response) => {
     if (!session) {
       res.status(404).json({ error: "Session not found" });
       return;
+    }
+
+    // Check for duplicate submission via idempotency key
+    if (idempotencyKey) {
+      const existing = await prisma.message.findUnique({
+        where: {
+          sessionId_idempotencyKey: { sessionId, idempotencyKey },
+        },
+      });
+      if (existing) {
+        res.status(409).json({ error: "Duplicate message" });
+        return;
+      }
     }
 
     // Get current message count for orderIndex
@@ -169,8 +186,9 @@ sessionRouter.post("/:id/messages", async (req: Request, res: Response) => {
       data: {
         sessionId,
         role: "user",
-        content: parsed.data.content,
+        content,
         orderIndex: messageCount,
+        idempotencyKey,
       },
     });
 

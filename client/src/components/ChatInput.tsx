@@ -10,9 +10,11 @@ export function ChatInput() {
     textareaRef.current?.focus();
   }, [state.activeSessionId]);
 
+  const isBusy = state.isStreaming || state.isTyping;
+
   const handleSubmit = () => {
     const trimmed = input.trim();
-    if (!trimmed || state.isStreaming) return;
+    if (!trimmed || isBusy) return;
     setInput("");
     sendMessage(trimmed);
     if (textareaRef.current) {
@@ -51,11 +53,11 @@ export function ChatInput() {
           onChange={handleChange}
           onKeyDown={handleKeyDown}
           placeholder="Enter the Matrix..."
-          disabled={state.isStreaming}
+          disabled={isBusy}
           rows={1}
           className="flex-1 bg-transparent border-none text-base md:text-sm text-[var(--green)] placeholder-[var(--green-dark)] resize-none outline-none disabled:opacity-30 font-[inherit] py-2"
         />
-        {state.isStreaming ? (
+        {isBusy ? (
           <button
             onClick={cancelStream}
             className="px-3 py-1.5 border border-[var(--red)] text-[var(--red)] text-xs tracking-wider hover:bg-[rgba(255,51,51,0.1)] transition-colors cursor-pointer font-[inherit] flex-shrink-0"

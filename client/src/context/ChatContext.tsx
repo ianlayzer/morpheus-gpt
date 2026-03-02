@@ -14,6 +14,7 @@ interface ChatState {
   activeSessionId: string | null;
   messages: api.Message[];
   isStreaming: boolean;
+  isTyping: boolean;
   error: string | null;
 }
 
@@ -28,6 +29,7 @@ type ChatAction =
   | { type: "APPEND_TOKEN"; text: string }
   | { type: "FINALIZE_STREAM" }
   | { type: "SET_STREAMING"; isStreaming: boolean }
+  | { type: "SET_TYPING"; isTyping: boolean }
   | { type: "SET_ERROR"; error: string | null }
   | { type: "CANCEL_STREAM" };
 
@@ -94,6 +96,8 @@ function chatReducer(state: ChatState, action: ChatAction): ChatState {
       };
     case "SET_STREAMING":
       return { ...state, isStreaming: action.isStreaming };
+    case "SET_TYPING":
+      return { ...state, isTyping: action.isTyping };
     case "SET_ERROR":
       return { ...state, error: action.error, isStreaming: false };
     default:
@@ -109,6 +113,7 @@ interface ChatContextValue {
   deleteSession: (id: string) => Promise<void>;
   sendMessage: (content: string) => void;
   cancelStream: () => void;
+  setTyping: (isTyping: boolean) => void;
 }
 
 const ChatContext = createContext<ChatContextValue | null>(null);
@@ -119,10 +124,13 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     activeSessionId: null,
     messages: [],
     isStreaming: false,
+    isTyping: false,
     error: null,
   });
 
   const abortRef = useRef<AbortController | null>(null);
+  const lastSentRef = useRef<{ content: string; time: number } | null>(null);
+  const skipNextFetchRef = useRef(false);
 
   // Load sessions on mount
   useEffect(() => {
@@ -137,6 +145,10 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   // Load messages when active session changes
   useEffect(() => {
     if (!state.activeSessionId) return;
+    if (skipNextFetchRef.current) {
+      skipNextFetchRef.current = false;
+      return;
+    }
     api.fetchMessages(state.activeSessionId).then((messages) => {
       dispatch({ type: "SET_MESSAGES", messages });
     });
@@ -173,7 +185,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   );
 
   const startStreaming = useCallback(
-    (sessionId: string, content: string) => {
+    (sessionId: string, content: string, idempotencyKey: string) => {
       dispatch({ type: "SET_STREAMING", isStreaming: true });
       dispatch({ type: "SET_ERROR", error: null });
 
@@ -210,7 +222,8 @@ export function ChatProvider({ children }: { children: ReactNode }) {
                 break;
             }
           },
-          controller.signal
+          controller.signal,
+          idempotencyKey
         )
         .catch((err) => {
           if (err.name === "AbortError") {
@@ -228,24 +241,37 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
   const handleSendMessage = useCallback(
     async (content: string) => {
-      if (state.isStreaming) return;
+      if (state.isStreaming || state.isTyping) return;
+
+      // 1-second dedup: silently ignore identical content sent within 1s
+      const now = Date.now();
+      const last = lastSentRef.current;
+      if (last && last.content === content && now - last.time < 1000) return;
+      lastSentRef.current = { content, time: now };
+
+      const idempotencyKey = crypto.randomUUID();
 
       if (state.activeSessionId) {
-        startStreaming(state.activeSessionId, content);
+        startStreaming(state.activeSessionId, content, idempotencyKey);
       } else {
         // Auto-create a session, then send
         const session = await api.createSession();
+        skipNextFetchRef.current = true;
         dispatch({ type: "ADD_SESSION", session });
         dispatch({ type: "SET_ACTIVE_SESSION", id: session.id });
-        startStreaming(session.id, content);
+        startStreaming(session.id, content, idempotencyKey);
       }
     },
-    [state.activeSessionId, state.isStreaming, startStreaming]
+    [state.activeSessionId, state.isStreaming, state.isTyping, startStreaming]
   );
 
   const cancelStream = useCallback(() => {
     abortRef.current?.abort();
     abortRef.current = null;
+  }, []);
+
+  const setTyping = useCallback((isTyping: boolean) => {
+    dispatch({ type: "SET_TYPING", isTyping });
   }, []);
 
   return (
@@ -258,6 +284,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         deleteSession: handleDeleteSession,
         sendMessage: handleSendMessage,
         cancelStream,
+        setTyping,
       }}
     >
       {children}

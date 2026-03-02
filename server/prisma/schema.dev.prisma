@@ -33,8 +33,10 @@ model Message {
   role       String   // 'user' | 'assistant' | 'system'
   content    String
   orderIndex Int
-  status     String   @default("complete") // 'streaming' | 'complete' | 'cancelled' | 'error'
-  createdAt  DateTime @default(now())
+  status         String   @default("complete") // 'streaming' | 'complete' | 'cancelled' | 'error'
+  idempotencyKey String?
+  createdAt      DateTime @default(now())
 
+  @@unique([sessionId, idempotencyKey])
   @@index([sessionId, orderIndex])
 }

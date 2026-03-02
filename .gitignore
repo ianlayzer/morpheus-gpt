@@ -141,3 +141,9 @@ vite.config.ts.timestamp-*
 # SQLite
 *.db
 *.db-journal
+
+# Playwright
+test-results/
+playwright-report/
+client/test-results/
+client/playwright-report/

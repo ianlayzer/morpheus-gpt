@@ -80,8 +80,8 @@ export function ChatView({ onMenuClick }: { onMenuClick: () => void }) {
               </div>
             </div>
           )}
-          {state.messages.map((message) => (
-            <MessageBubble key={message.id} message={message} />
+          {state.messages.map((message, i) => (
+            <MessageBubble key={message.id} message={message} isLast={i === state.messages.length - 1} />
           ))}
           <div />
         </div>

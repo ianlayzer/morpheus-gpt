@@ -15,6 +15,7 @@ describe("ChatInput", () => {
         activeSessionId: "test-session",
         messages: [],
         isStreaming: false,
+        isTyping: false,
         error: null,
         ...overrides,
       },
@@ -24,6 +25,7 @@ describe("ChatInput", () => {
       selectSession: vi.fn(),
       renameSession: vi.fn(),
       deleteSession: vi.fn(),
+      setTyping: vi.fn(),
     });
 
     return render(<ChatInput />);

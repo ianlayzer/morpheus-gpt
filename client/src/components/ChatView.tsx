@@ -11,10 +11,21 @@ export function ChatView({ onMenuClick }: { onMenuClick: () => void }) {
   const lastMessage = state.messages[state.messages.length - 1];
   const streamingContent = lastMessage?.status === "streaming" ? lastMessage.content : null;
 
-  useEffect(() => {
+  const scrollToBottom = () => {
     const el = scrollRef.current;
     if (el) el.scrollTop = el.scrollHeight;
-  }, [state.messages.length, streamingContent]);
+  };
+
+  useEffect(scrollToBottom, [state.messages.length, streamingContent]);
+
+  // Re-scroll when mobile keyboard opens/closes (viewport resizes)
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const handler = () => scrollToBottom();
+    vv.addEventListener("resize", handler);
+    return () => vv.removeEventListener("resize", handler);
+  }, []);
 
   const activeSession = state.sessions.find(
     (s) => s.id === state.activeSessionId

@@ -8,7 +8,7 @@
     "start": "node dist/index.js",
     "test": "prisma generate --schema ./prisma/schema.dev.prisma && vitest run",
     "db:push": "prisma db push --schema ./prisma/schema.dev.prisma",
-    "db:push:prod": "prisma db push --schema ./prisma/schema.prisma"
+    "db:push:prod": "node -e \"require('dotenv').config(); process.env.DATABASE_URL=process.env.DATABASE_URL_PROD; require('child_process').execSync('prisma db push --schema ./prisma/schema.prisma', {stdio:'inherit', env:process.env})\""
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",

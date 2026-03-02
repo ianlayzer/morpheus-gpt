@@ -126,7 +126,7 @@ function SessionItem({
             if (e.key === "Escape") setEditing(false);
           }}
           onClick={(e) => e.stopPropagation()}
-          className="flex-1 bg-[var(--bg)] border border-[var(--green-dark)] text-xs text-[var(--green)] px-1 py-0.5 outline-none font-[inherit]"
+          className="flex-1 bg-[var(--bg)] border border-[var(--green-dark)] text-base md:text-xs text-[var(--green)] px-1 py-0.5 outline-none font-[inherit]"
         />
       ) : (
         <>

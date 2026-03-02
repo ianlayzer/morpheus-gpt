@@ -52,7 +52,7 @@ export function AuthPage() {
               onChange={(e) => setUsername(e.target.value)}
               autoFocus
               autoComplete="username"
-              className="w-full bg-[var(--surface)] border border-[var(--border)] text-[var(--green)] text-sm px-3 py-2 outline-none focus:border-[var(--green-dark)] font-[inherit] tracking-wider"
+              className="w-full bg-[var(--surface)] border border-[var(--border)] text-[var(--green)] text-base md:text-sm px-3 py-2 outline-none focus:border-[var(--green-dark)] font-[inherit] tracking-wider"
               placeholder="neo"
             />
           </div>
@@ -66,7 +66,7 @@ export function AuthPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               autoComplete={mode === "login" ? "current-password" : "new-password"}
-              className="w-full bg-[var(--surface)] border border-[var(--border)] text-[var(--green)] text-sm px-3 py-2 outline-none focus:border-[var(--green-dark)] font-[inherit] tracking-wider"
+              className="w-full bg-[var(--surface)] border border-[var(--border)] text-[var(--green)] text-base md:text-sm px-3 py-2 outline-none focus:border-[var(--green-dark)] font-[inherit] tracking-wider"
               placeholder="******"
             />
           </div>

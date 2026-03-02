@@ -41,8 +41,8 @@ export function ChatInput() {
           ERROR: {state.error}
         </div>
       )}
-      <div className="flex items-end gap-2 max-w-3xl mx-auto">
-        <span className="text-[var(--green)] glow text-sm pb-2.5 flex-shrink-0 select-none">
+      <div className="flex items-center gap-2 max-w-3xl mx-auto">
+        <span className="text-[var(--green)] glow text-sm flex-shrink-0 select-none">
           &gt;
         </span>
         <textarea
@@ -53,7 +53,7 @@ export function ChatInput() {
           placeholder="Enter the Matrix..."
           disabled={state.isStreaming}
           rows={1}
-          className="flex-1 bg-transparent border-none text-sm text-[var(--green)] placeholder-[var(--green-dark)] resize-none outline-none disabled:opacity-30 font-[inherit] py-2"
+          className="flex-1 bg-transparent border-none text-base md:text-sm text-[var(--green)] placeholder-[var(--green-dark)] resize-none outline-none disabled:opacity-30 font-[inherit] py-2"
         />
         {state.isStreaming ? (
           <button

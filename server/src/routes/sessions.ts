@@ -217,17 +217,18 @@ sessionRouter.post("/:id/messages", async (req: Request, res: Response) => {
     let fullContent = "";
     let aborted = false;
 
-    // Handle client disconnect
-    req.on("close", () => {
-      aborted = true;
-    });
-
     try {
       const stream = anthropic.messages.stream({
         model: "claude-haiku-4-5-20251001",
         max_tokens: 4096,
         system: MORPHEUS_SYSTEM_PROMPT,
         messages: truncatedHistory,
+      });
+
+      // Handle client disconnect — abort the Anthropic stream
+      req.on("close", () => {
+        aborted = true;
+        stream.abort();
       });
 
       for await (const event of stream) {

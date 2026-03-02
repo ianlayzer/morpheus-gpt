@@ -5,18 +5,23 @@ import { ChatInput } from "./ChatInput";
 
 export function ChatView({ onMenuClick }: { onMenuClick: () => void }) {
   const { state } = useChat();
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Scroll to bottom when messages change or tokens stream in
+  const lastMessage = state.messages[state.messages.length - 1];
+  const streamingContent = lastMessage?.status === "streaming" ? lastMessage.content : null;
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [state.messages]);
+    const el = scrollRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [state.messages.length, streamingContent]);
 
   const activeSession = state.sessions.find(
     (s) => s.id === state.activeSessionId
   );
 
   return (
-    <div className="flex-1 flex flex-col min-w-0 bg-[var(--bg)]">
+    <div className="flex-1 flex flex-col min-w-0 min-h-0 bg-[var(--bg)]">
       {/* Top bar: hamburger (mobile) + session title */}
       <div className="px-3 md:px-4 py-2 border-b border-[var(--border)] flex-shrink-0 flex items-center gap-3">
         <button
@@ -33,7 +38,7 @@ export function ChatView({ onMenuClick }: { onMenuClick: () => void }) {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-3 md:px-4 pt-4 pb-2">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto px-3 md:px-4 pt-4 pb-4">
         <div className="max-w-3xl mx-auto">
           {!state.activeSessionId && (
             <div className="flex items-center justify-center min-h-[60vh]">
@@ -78,7 +83,7 @@ export function ChatView({ onMenuClick }: { onMenuClick: () => void }) {
           {state.messages.map((message) => (
             <MessageBubble key={message.id} message={message} />
           ))}
-          <div ref={bottomRef} />
+          <div />
         </div>
       </div>
       <ChatInput />

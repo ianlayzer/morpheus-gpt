@@ -38,23 +38,17 @@ User (id, username, passwordHash, createdAt)
 - **Duplicate submission**: idempotency key on messages + 1-second client-side dedup
 - **Long conversations**: context truncation drops oldest messages to stay within ~80k token window
 
-## Tradeoffs
-
-**Deferred**: retry/regenerate button, rate limiting, message search, OAuth providers, refresh token rotation
-
-**Would change with more time**: WebSocket typing indicators, message search, export/import, proper React error boundaries
-
-**Potential scale issues**: all messages loaded into memory for Claude API calls (needs summarization for very long conversations), no CDN for static assets, single JWT secret (needs rotation strategy)
-
 ## Production Considerations
 
 **Bottlenecks**: Claude API latency (~2-10s first token), database writes during streaming
 
 **Cost drivers**: Claude API usage scales with context window size — truncation helps control costs
 
-**Security**: bcrypt (10 rounds), JWT auth, API key in env vars only, Zod validation on all inputs, Prisma ORM prevents SQL injection, React escaping mitigates XSS, session isolation per user
+**Security**: bcrypt (10 rounds), JWT auth, API key in env vars only, Prisma ORM prevents SQL injection, React escaping mitigates XSS, session isolation per user
 
-**Observability**: request logging middleware on all API endpoints
+**Observability**: structured logging via Splunk HEC — every API request emits a canonical log line (method, route, status, duration, userId) to a Splunk index. A [dashboard](server/splunk-dashboard.json) tracks message/session volume, per-user activity, error rates, and endpoint breakdown.
+
+![Splunk Dashboard](morpheus-gpt-splunk.png)
 
 ## Time Allocation
 

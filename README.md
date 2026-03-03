@@ -8,11 +8,11 @@ A Matrix-themed ChatGPT clone — chat with Morpheus via streaming token-by-toke
 
 ![Architecture Diagram](happy-path-design.png)
 
-**Frontend**: React 19 + TypeScript (Vite), Tailwind CSS, react-markdown
-**Backend**: Express + TypeScript, Prisma ORM, Zod validation
-**Database**: SQLite (dev) / PostgreSQL (prod via Railway)
-**LLM**: Claude API (Haiku for chat + title generation)
-**Auth**: bcrypt password hashing + JWT (7-day expiry)
+- **Frontend**: React 19 + TypeScript (Vite), Tailwind CSS, react-markdown
+- **Backend**: Express + TypeScript, Prisma ORM, Zod validation
+- **Database**: SQLite (dev) / PostgreSQL (prod via Railway)
+- **LLM**: Claude API (Haiku for chat + title generation)
+- **Auth**: bcrypt password hashing + JWT (7-day expiry)
 
 ### Streaming
 
@@ -42,17 +42,14 @@ User (id, username, passwordHash, createdAt)
 
 ## Production Considerations
 
-**Bottlenecks**: Claude API latency (~2-10s first token), database writes during streaming
-
-**Cost drivers**: Claude API usage scales with context window size — truncation helps control costs
-
-**Security**: bcrypt (10 rounds), JWT auth, API key in env vars only, Prisma ORM prevents SQL injection, React escaping mitigates XSS, session isolation per user
-
-**Observability**: structured logging via Splunk HEC — every API request emits a canonical log line (method, route, status, duration, userId) to a Splunk index. A [dashboard](server/splunk-dashboard.json) tracks message/session volume, per-user activity, error rates, and endpoint breakdown.
+- **Bottlenecks**: Claude API latency (~2-10s first token), database writes during streaming
+- **Cost drivers**: Claude API usage scales with context window size — truncation helps control costs
+- **Security**: bcrypt (10 rounds), JWT auth, API key in env vars only, Prisma ORM prevents SQL injection, React escaping mitigates XSS, session isolation per user
+- **Observability**: structured logging via Splunk HEC — every API request emits a canonical log line (method, route, status, duration, userId) to a Splunk index. A [dashboard](server/splunk-dashboard.json) tracks message/session volume, per-user activity, error rates, and endpoint breakdown.
 
 ![Splunk Dashboard](morpheus-gpt-splunk.png)
 
-**Testing**:
+### Testing
 - **Backend API** (Vitest + Supertest): session CRUD, auth enforcement, and input validation against a real SQLite database
 - **Frontend components** (Vitest + React Testing Library): input behavior, streaming UI states, and keyboard interactions
 - **End-to-end** (Playwright): full user flow — registration, multi-turn chat with streamed responses, and session management — against a live server

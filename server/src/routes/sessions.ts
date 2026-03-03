@@ -3,11 +3,11 @@ import { z } from "zod";
 import { prisma } from "../lib/prisma";
 import type { Message } from "@prisma/client";
 import {
-  anthropic,
+  llm,
   MORPHEUS_SYSTEM_PROMPT,
   truncateContext,
   ChatMessage,
-} from "../lib/claude";
+} from "../lib/llm";
 import { authMiddleware } from "../middleware/auth";
 
 export const sessionRouter = Router();
@@ -236,31 +236,24 @@ sessionRouter.post("/:id/messages", async (req: Request, res: Response) => {
     let aborted = false;
 
     try {
-      const stream = anthropic.messages.stream({
-        model: "claude-haiku-4-5-20251001",
-        max_tokens: 4096,
+      const stream = llm.streamChat({
         system: MORPHEUS_SYSTEM_PROMPT,
         messages: truncatedHistory,
+        maxTokens: 4096,
       });
 
-      // Handle client disconnect — abort the Anthropic stream
+      // Handle client disconnect — abort the LLM stream
       req.on("close", () => {
         aborted = true;
         stream.abort();
       });
 
-      for await (const event of stream) {
+      for await (const text of stream) {
         if (aborted) break;
-
-        if (
-          event.type === "content_block_delta" &&
-          event.delta.type === "text_delta"
-        ) {
-          fullContent += event.delta.text;
-          res.write(
-            `data: ${JSON.stringify({ type: "token", text: event.delta.text })}\n\n`
-          );
-        }
+        fullContent += text;
+        res.write(
+          `data: ${JSON.stringify({ type: "token", text })}\n\n`
+        );
       }
 
       if (aborted) {
@@ -322,21 +315,15 @@ async function generateTitle(
   res: Response
 ) {
   try {
-    const titleResponse = await anthropic.messages.create({
-      model: "claude-haiku-4-5-20251001",
-      max_tokens: 50,
+    const title = await llm.complete({
       messages: [
         {
           role: "user",
           content: `Generate a short title (max 6 words) for a conversation that starts with this exchange. Return ONLY the title, no quotes or punctuation.\n\nUser: ${userMessage}\nAssistant: ${assistantResponse.slice(0, 500)}`,
         },
       ],
-    });
-
-    const title =
-      titleResponse.content[0].type === "text"
-        ? titleResponse.content[0].text.trim()
-        : "New Chat";
+      maxTokens: 50,
+    }) || "New Chat";
 
     await prisma.session.update({
       where: { id: sessionId },

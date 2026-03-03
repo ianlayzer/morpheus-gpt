@@ -1,6 +1,22 @@
-import Anthropic from "@anthropic-ai/sdk";
+export interface ChatMessage {
+  role: "user" | "assistant";
+  content: string;
+}
 
-export const anthropic = new Anthropic();
+export interface LLMProvider {
+  /** Stream a chat completion, yielding text chunks */
+  streamChat(opts: {
+    system: string;
+    messages: ChatMessage[];
+    maxTokens: number;
+  }): AsyncIterable<string> & { abort: () => void };
+
+  /** Non-streaming completion, returns full text */
+  complete(opts: {
+    messages: ChatMessage[];
+    maxTokens: number;
+  }): Promise<string>;
+}
 
 export const MORPHEUS_SYSTEM_PROMPT = `You are Morpheus from The Matrix, communicating through a text terminal.
 
@@ -12,11 +28,6 @@ Rules:
 - Never break character.`;
 
 const MAX_CONTEXT_CHARS = 320_000; // ~80k tokens at ~4 chars/token
-
-export interface ChatMessage {
-  role: "user" | "assistant";
-  content: string;
-}
 
 export function truncateContext(messages: ChatMessage[]): ChatMessage[] {
   if (messages.length === 0) return messages;
@@ -42,3 +53,8 @@ export function truncateContext(messages: ChatMessage[]): ChatMessage[] {
 
   return [...truncated, ...kept];
 }
+
+import { AnthropicProvider } from "./providers/anthropic";
+
+// Add cases here to support other providers in the future
+export const llm: LLMProvider = new AnthropicProvider();

@@ -44,6 +44,27 @@
         "query": "index=main sourcetype=_json message.event=\"canonical-api-line\" message.userId!=\"null\" | stats dc(message.userId) as \"Total Users\""
       }
     },
+    "ds_total_sessions": {
+      "type": "ds.search",
+      "name": "Total Sessions",
+      "options": {
+        "query": "index=main sourcetype=_json message.event=\"canonical-api-line\" message.method=\"POST\" message.route=\"/sessions/\" | stats count as \"Total Sessions\""
+      }
+    },
+    "ds_sessions_time": {
+      "type": "ds.search",
+      "name": "Sessions Created Over Time",
+      "options": {
+        "query": "index=main sourcetype=_json message.event=\"canonical-api-line\" message.method=\"POST\" message.route=\"/sessions/\" | timechart count"
+      }
+    },
+    "ds_sessions_by_user": {
+      "type": "ds.search",
+      "name": "Sessions Created by User Over Time",
+      "options": {
+        "query": "index=main sourcetype=_json message.event=\"canonical-api-line\" message.method=\"POST\" message.route=\"/sessions/\" | timechart count by message.userId"
+      }
+    },
     "ds_requests_by_endpoint": {
       "type": "ds.search",
       "name": "Requests by Endpoint",
@@ -64,6 +85,32 @@
     }
   },
   "visualizations": {
+    "viz_total_messages": {
+      "type": "splunk.singlevalue",
+      "title": "Total Messages Sent",
+      "dataSources": { "primary": "ds_total_messages" },
+      "options": {}
+    },
+    "viz_total_sessions": {
+      "type": "splunk.singlevalue",
+      "title": "Total Sessions",
+      "dataSources": { "primary": "ds_total_sessions" },
+      "options": {}
+    },
+    "viz_total_users": {
+      "type": "splunk.singlevalue",
+      "title": "Total Users",
+      "dataSources": { "primary": "ds_total_users" },
+      "options": {}
+    },
+    "viz_msg_avg_duration": {
+      "type": "splunk.singlevalue",
+      "title": "Send Message — Avg Duration (ms)",
+      "dataSources": { "primary": "ds_msg_avg_duration" },
+      "options": {
+        "unit": "ms"
+      }
+    },
     "viz_msg_requests_time": {
       "type": "splunk.area",
       "title": "Send Message — Requests Over Time",
@@ -76,24 +123,16 @@
       "dataSources": { "primary": "ds_msg_requests_by_user" },
       "options": {}
     },
-    "viz_msg_avg_duration": {
-      "type": "splunk.singlevalue",
-      "title": "Send Message — Avg Duration (ms)",
-      "dataSources": { "primary": "ds_msg_avg_duration" },
-      "options": {
-        "unit": "ms"
-      }
-    },
-    "viz_total_messages": {
-      "type": "splunk.singlevalue",
-      "title": "Total Messages Sent",
-      "dataSources": { "primary": "ds_total_messages" },
+    "viz_sessions_time": {
+      "type": "splunk.area",
+      "title": "Sessions Created Over Time",
+      "dataSources": { "primary": "ds_sessions_time" },
       "options": {}
     },
-    "viz_total_users": {
-      "type": "splunk.singlevalue",
-      "title": "Total Users",
-      "dataSources": { "primary": "ds_total_users" },
+    "viz_sessions_by_user": {
+      "type": "splunk.line",
+      "title": "Sessions Created by User",
+      "dataSources": { "primary": "ds_sessions_by_user" },
       "options": {}
     },
     "viz_msg_errors_by_status": {
@@ -116,17 +155,22 @@
       {
         "item": "viz_total_messages",
         "type": "block",
-        "position": { "x": 20, "y": 20, "w": 450, "h": 120 }
+        "position": { "x": 20, "y": 20, "w": 330, "h": 120 }
+      },
+      {
+        "item": "viz_total_sessions",
+        "type": "block",
+        "position": { "x": 375, "y": 20, "w": 330, "h": 120 }
       },
       {
         "item": "viz_total_users",
         "type": "block",
-        "position": { "x": 495, "y": 20, "w": 450, "h": 120 }
+        "position": { "x": 730, "y": 20, "w": 330, "h": 120 }
       },
       {
         "item": "viz_msg_avg_duration",
         "type": "block",
-        "position": { "x": 970, "y": 20, "w": 450, "h": 120 }
+        "position": { "x": 1085, "y": 20, "w": 335, "h": 120 }
       },
       {
         "item": "viz_msg_requests_time",
@@ -139,19 +183,29 @@
         "position": { "x": 740, "y": 170, "w": 680, "h": 300 }
       },
       {
+        "item": "viz_sessions_time",
+        "type": "block",
+        "position": { "x": 20, "y": 500, "w": 700, "h": 300 }
+      },
+      {
+        "item": "viz_sessions_by_user",
+        "type": "block",
+        "position": { "x": 740, "y": 500, "w": 680, "h": 300 }
+      },
+      {
         "item": "viz_msg_errors_by_status",
         "type": "block",
-        "position": { "x": 20, "y": 500, "w": 1400, "h": 300 }
+        "position": { "x": 20, "y": 830, "w": 1400, "h": 300 }
       },
       {
         "item": "viz_requests_by_endpoint",
         "type": "block",
-        "position": { "x": 20, "y": 830, "w": 1400, "h": 350 }
+        "position": { "x": 20, "y": 1160, "w": 1400, "h": 350 }
       }
     ],
     "options": {
       "width": 1440,
-      "height": 1250
+      "height": 1580
     }
   }
 }

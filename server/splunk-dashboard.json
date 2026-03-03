@@ -1,0 +1,157 @@
+{
+  "title": "Morpheus GPT API Monitor",
+  "description": "API observability — focused on the send-message endpoint with overall endpoint breakdown.",
+  "dataSources": {
+    "ds_msg_requests_time": {
+      "type": "ds.search",
+      "name": "Send Message Requests Over Time",
+      "options": {
+        "query": "index=main sourcetype=_json message.event=\"canonical-api-line\" message.method=\"POST\" message.route=\"/sessions/:id/messages\" | timechart count"
+      }
+    },
+    "ds_msg_requests_by_user": {
+      "type": "ds.search",
+      "name": "Send Message Requests by User Over Time",
+      "options": {
+        "query": "index=main sourcetype=_json message.event=\"canonical-api-line\" message.method=\"POST\" message.route=\"/sessions/:id/messages\" | timechart count by message.userId"
+      }
+    },
+    "ds_msg_avg_duration": {
+      "type": "ds.search",
+      "name": "Send Message Avg Duration",
+      "options": {
+        "query": "index=main sourcetype=_json message.event=\"canonical-api-line\" message.method=\"POST\" message.route=\"/sessions/:id/messages\" | stats avg(message.duration) as \"Avg Duration (ms)\""
+      }
+    },
+    "ds_msg_errors_by_status": {
+      "type": "ds.search",
+      "name": "Send Message Errors by Status Code",
+      "options": {
+        "query": "index=main sourcetype=_json message.event=\"canonical-api-line\" message.method=\"POST\" message.route=\"/sessions/:id/messages\" message.statusCode>=400 | timechart count by message.statusCode"
+      }
+    },
+    "ds_total_messages": {
+      "type": "ds.search",
+      "name": "Total Messages Sent",
+      "options": {
+        "query": "index=main sourcetype=_json message.event=\"canonical-api-line\" message.method=\"POST\" message.route=\"/sessions/:id/messages\" | stats count as \"Total Messages\""
+      }
+    },
+    "ds_total_users": {
+      "type": "ds.search",
+      "name": "Total Users",
+      "options": {
+        "query": "index=main sourcetype=_json message.event=\"canonical-api-line\" message.userId!=\"null\" | stats dc(message.userId) as \"Total Users\""
+      }
+    },
+    "ds_requests_by_endpoint": {
+      "type": "ds.search",
+      "name": "Requests by Endpoint",
+      "options": {
+        "query": "index=main sourcetype=_json message.event=\"canonical-api-line\" | stats count by message.method, message.route | sort -count"
+      }
+    }
+  },
+  "defaults": {},
+  "inputs": {
+    "input_time": {
+      "type": "input.timerange",
+      "options": {
+        "token": "time",
+        "defaultValue": "-24h@h,now"
+      },
+      "title": "Time Range"
+    }
+  },
+  "visualizations": {
+    "viz_msg_requests_time": {
+      "type": "splunk.area",
+      "title": "Send Message — Requests Over Time",
+      "dataSources": { "primary": "ds_msg_requests_time" },
+      "options": {}
+    },
+    "viz_msg_requests_by_user": {
+      "type": "splunk.line",
+      "title": "Send Message — Requests by User",
+      "dataSources": { "primary": "ds_msg_requests_by_user" },
+      "options": {}
+    },
+    "viz_msg_avg_duration": {
+      "type": "splunk.singlevalue",
+      "title": "Send Message — Avg Duration (ms)",
+      "dataSources": { "primary": "ds_msg_avg_duration" },
+      "options": {
+        "unit": "ms"
+      }
+    },
+    "viz_total_messages": {
+      "type": "splunk.singlevalue",
+      "title": "Total Messages Sent",
+      "dataSources": { "primary": "ds_total_messages" },
+      "options": {}
+    },
+    "viz_total_users": {
+      "type": "splunk.singlevalue",
+      "title": "Total Users",
+      "dataSources": { "primary": "ds_total_users" },
+      "options": {}
+    },
+    "viz_msg_errors_by_status": {
+      "type": "splunk.line",
+      "title": "Send Message — Errors by Status Code",
+      "dataSources": { "primary": "ds_msg_errors_by_status" },
+      "options": {}
+    },
+    "viz_requests_by_endpoint": {
+      "type": "splunk.table",
+      "title": "All Endpoints — Request Counts",
+      "dataSources": { "primary": "ds_requests_by_endpoint" },
+      "options": {}
+    }
+  },
+  "layout": {
+    "type": "absolute",
+    "globalInputs": ["input_time"],
+    "structure": [
+      {
+        "item": "viz_total_messages",
+        "type": "block",
+        "position": { "x": 20, "y": 20, "w": 450, "h": 120 }
+      },
+      {
+        "item": "viz_total_users",
+        "type": "block",
+        "position": { "x": 495, "y": 20, "w": 450, "h": 120 }
+      },
+      {
+        "item": "viz_msg_avg_duration",
+        "type": "block",
+        "position": { "x": 970, "y": 20, "w": 450, "h": 120 }
+      },
+      {
+        "item": "viz_msg_requests_time",
+        "type": "block",
+        "position": { "x": 20, "y": 170, "w": 700, "h": 300 }
+      },
+      {
+        "item": "viz_msg_requests_by_user",
+        "type": "block",
+        "position": { "x": 740, "y": 170, "w": 680, "h": 300 }
+      },
+      {
+        "item": "viz_msg_errors_by_status",
+        "type": "block",
+        "position": { "x": 20, "y": 500, "w": 1400, "h": 300 }
+      },
+      {
+        "item": "viz_requests_by_endpoint",
+        "type": "block",
+        "position": { "x": 20, "y": 830, "w": 1400, "h": 350 }
+      }
+    ],
+    "options": {
+      "width": 1440,
+      "height": 1250
+    }
+  }
+}

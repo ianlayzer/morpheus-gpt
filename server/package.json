@@ -21,6 +21,7 @@
     "express": "^4.21.0",
     "jsonwebtoken": "^9.0.3",
     "prisma": "^6.3.0",
+    "splunk-logging-hec": "^0.10.2",
     "typescript": "^5.7.0",
     "zod": "^3.24.0"
   },
